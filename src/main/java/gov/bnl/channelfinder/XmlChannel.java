@@ -187,7 +187,6 @@ public class XmlChannel {
     /**
      * Creates a compact string representation for the log.
      *
-     * @param data XmlChannel to create the string representation for
      * @return string representation
      */
     public String toLog() {

@@ -48,7 +48,6 @@ public class TagManager {
 
     /**
      * GET method for retrieving the list of tags in the database.
-     * @param map 
      *
      * @return list of all tags
      */
@@ -153,7 +152,7 @@ public class TagManager {
     /**
      * PUT method for creating multiple tags.
      * 
-     * @param testTags - XmlTags to be created
+     * @param tags - XmlTags to be created
      * @return the list of tags created
      */
     @PutMapping()

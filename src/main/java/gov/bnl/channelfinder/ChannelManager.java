@@ -343,7 +343,7 @@ public class ChannelManager {
      * 2. the channel owner is not null or empty
      * 3. all the listed tags/props exist and prop value is not null or empty
      * 
-     * @param data
+     * @param channel
      */
     public void validateChannelRequest(XmlChannel channel) {
         // 1 
@@ -393,7 +393,7 @@ public class ChannelManager {
      * 2. the tag owners are not null or empty
      * 3. all the channels exist
      * 
-     * @param data
+     * @param channels
      */
     public void validateChannelRequest(Iterable<XmlChannel> channels) {
         for(XmlChannel channel: channels) {

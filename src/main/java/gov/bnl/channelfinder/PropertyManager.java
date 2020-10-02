@@ -586,7 +586,7 @@ public class PropertyManager {
      * 3. the property value is not null or empty
      * 4. all the listed channels exist
      * 
-     * @param data
+     * @param properties
      */
     public void validatePropertyRequest(Iterable<XmlProperty> properties) {
         for(XmlProperty property: properties) {
@@ -596,7 +596,7 @@ public class PropertyManager {
 
     /**
      * Checks if the channel exists
-     * @param data
+     * @param channelName
      */
     public void validatePropertyRequest(String channelName) {
         if(!channelRepository.existsById(channelName)) {

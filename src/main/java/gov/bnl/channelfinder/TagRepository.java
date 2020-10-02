@@ -77,7 +77,7 @@ public class TagRepository implements CrudRepository<XmlTag, String> {
     public <S extends XmlTag> S index(S tag) {
         RestHighLevelClient client = esService.getIndexClient(); 
         try {
-            IndexRequest indexRequest = new IndexRequest(ES_TAG_INDEX, ES_TAG_TYPE)
+            IndexRequest indexRequest = new IndexRequest(ES_TAG_INDEX)
                     .id(tag.getName())
                     .source(objectMapper.writeValueAsBytes(tag), XContentType.JSON);
             indexRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
@@ -107,7 +107,7 @@ public class TagRepository implements CrudRepository<XmlTag, String> {
         try {
             BulkRequest bulkRequest = new BulkRequest();
             for (XmlTag tag : tags) {
-                IndexRequest indexRequest = new IndexRequest(ES_TAG_INDEX, ES_TAG_TYPE)
+                IndexRequest indexRequest = new IndexRequest(ES_TAG_INDEX)
                         .id(tag.getName())
                         .source(objectMapper.writeValueAsBytes(tag), XContentType.JSON);
                 bulkRequest.add(indexRequest);
@@ -152,8 +152,8 @@ public class TagRepository implements CrudRepository<XmlTag, String> {
             if(present) {
                 deleteById(tagName);
             } 
-            updateRequest = new UpdateRequest(ES_TAG_INDEX, ES_TAG_TYPE, tag.getName());
-            IndexRequest indexRequest = new IndexRequest(ES_TAG_INDEX, ES_TAG_TYPE)
+            updateRequest = new UpdateRequest(ES_TAG_INDEX, tag.getName());
+            IndexRequest indexRequest = new IndexRequest(ES_TAG_INDEX)
                     .id(tag.getName())
                     .source(objectMapper.writeValueAsBytes(tag), XContentType.JSON);
             updateRequest.doc(objectMapper.writeValueAsBytes(tag), XContentType.JSON).upsert(indexRequest);
@@ -191,13 +191,13 @@ public class TagRepository implements CrudRepository<XmlTag, String> {
         BulkRequest bulkRequest = new BulkRequest();
         try {
             for (XmlTag tag : tags) {
-                UpdateRequest updateRequest = new UpdateRequest(ES_TAG_INDEX, ES_TAG_TYPE, tag.getName());
+                UpdateRequest updateRequest = new UpdateRequest(ES_TAG_INDEX, tag.getName());
 
                 Optional<XmlTag> existingTag = findById(tag.getName());
                 if (existingTag.isPresent()) {
                     updateRequest.doc(objectMapper.writeValueAsBytes(tag), XContentType.JSON);
                 } else {
-                    IndexRequest indexRequest = new IndexRequest(ES_TAG_INDEX, ES_TAG_TYPE)
+                    IndexRequest indexRequest = new IndexRequest(ES_TAG_INDEX)
                             .id(tag.getName())
                             .source(objectMapper.writeValueAsBytes(tag), XContentType.JSON);
                     updateRequest.doc(objectMapper.writeValueAsBytes(tag), XContentType.JSON).upsert(indexRequest);
@@ -247,7 +247,7 @@ public class TagRepository implements CrudRepository<XmlTag, String> {
      */
     public Optional<XmlTag> findById(String tagId, boolean withChannels) {
         RestHighLevelClient client = esService.getSearchClient();
-        GetRequest getRequest = new GetRequest(ES_TAG_INDEX, ES_TAG_TYPE, tagId);
+        GetRequest getRequest = new GetRequest(ES_TAG_INDEX, tagId);
         try {
             GetResponse response = client.get(getRequest, RequestOptions.DEFAULT);
             if (response.isExists()) {
@@ -274,7 +274,7 @@ public class TagRepository implements CrudRepository<XmlTag, String> {
     public boolean existsById(String id) {
 
         RestHighLevelClient client = esService.getSearchClient();
-        GetRequest getRequest = new GetRequest(ES_TAG_INDEX, ES_TAG_TYPE, id);
+        GetRequest getRequest = new GetRequest(ES_TAG_INDEX, id);
         getRequest.fetchSourceContext(new FetchSourceContext(false));
         getRequest.storedFields("_none_");
         try {
@@ -297,7 +297,6 @@ public class TagRepository implements CrudRepository<XmlTag, String> {
 
         SearchRequest searchRequest = new SearchRequest();
         searchRequest.indices(ES_TAG_INDEX);
-        searchRequest.types(ES_TAG_TYPE);
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         // TODO use of scroll will be necessary
@@ -333,7 +332,7 @@ public class TagRepository implements CrudRepository<XmlTag, String> {
         MultiGetRequest request = new MultiGetRequest();
 
         for (String tagId : tagIds) {
-            request.add(new MultiGetRequest.Item(ES_TAG_INDEX, ES_TAG_TYPE, tagId));
+            request.add(new MultiGetRequest.Item(ES_TAG_INDEX, tagId));
         }
         try {
             List<XmlTag> foundTags = new ArrayList<XmlTag>();
@@ -366,7 +365,7 @@ public class TagRepository implements CrudRepository<XmlTag, String> {
     @Override
     public void deleteById(String tagName) {
         RestHighLevelClient client = esService.getIndexClient();
-        DeleteRequest request = new DeleteRequest(ES_TAG_INDEX, ES_TAG_TYPE, tagName);
+        DeleteRequest request = new DeleteRequest(ES_TAG_INDEX, tagName);
         request.setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
 
         try {

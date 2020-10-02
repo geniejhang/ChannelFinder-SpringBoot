@@ -20,75 +20,78 @@ es_port=9200
 curl -H 'Content-Type: application/json' -XPUT http://${es_host}:${es_port}/cf_tags -d'
 {
 "mappings":{
-  "cf_tag" : {
-    "properties" : {
-      "name" : {
-        "type" : "keyword"
-      },
-      "owner" : {
-        "type" : "keyword"
-      }
-    }
+  "properties" : {
+    "type" : {
+      "type" : "keyword"
+    },
+    "name" : {
+      "type" : "keyword"
+    },
+    "owner" : {
+      "type" : "keyword"
     }
   }
+}
 }'
 
 curl -H 'Content-Type: application/json' -XPUT http://${es_host}:${es_port}/cf_properties -d'
 {
 "mappings":{
-  "cf_property" : {
-    "properties" : {
-      "name" : {
-        "type" : "keyword"
-      },
-      "owner" : {
-        "type" : "keyword"
-      }
+  "properties" : {
+    "type" : {
+      "type" : "keyword"
+    },
+    "name" : {
+      "type" : "keyword"
+    },
+    "owner" : {
+      "type" : "keyword"
     }
   }
-  }
+}
 }'
 
 curl -H 'Content-Type: application/json' -XPUT http://${es_host}:${es_port}/channelfinder -d'
 {
 "mappings":{
-  "cf_channel" : {
+  "properties" : {
+    "type" : {
+      "type" : "keyword"
+    },
+    "name" : {
+      "type" : "keyword"
+    },
+    "owner" : {
+      "type" : "keyword"
+    },
+    "script" : {
+      "type" : "keyword"
+    },
     "properties" : {
-      "name" : {
-        "type" : "keyword"
-      },
-      "owner" : {
-        "type" : "keyword"
-      },
-      "script" : {
-        "type" : "keyword"
-      },
+      "type" : "nested",
       "properties" : {
-        "type" : "nested",
-        "properties" : {
-          "name" : {
-            "type" : "keyword"
-          },
-          "owner" : {
-            "type" : "keyword"
-          },
-          "value" : {
-            "type" : "keyword"
-          }
+        "name" : {
+          "type" : "keyword"
+        },
+        "owner" : {
+          "type" : "keyword"
+        },
+        "value" : {
+          "type" : "keyword"
         }
-      },
-      "tags" : {
-        "type" : "nested",
-        "properties" : {
-          "name" : {
-            "type" : "keyword"
-          },
-          "owner" : {
-            "type" : "keyword"
-          }
+      }
+    },
+    "tags" : {
+      "type" : "nested",
+      "properties" : {
+        "name" : {
+          "type" : "keyword"
+        },
+        "owner" : {
+          "type" : "keyword"
         }
       }
     }
   }
-  }
+}
 }'

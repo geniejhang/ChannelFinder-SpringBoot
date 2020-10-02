@@ -78,7 +78,7 @@ public class PropertyRepository implements CrudRepository<XmlProperty, String> {
     public <S extends XmlProperty> S index(XmlProperty property) {
         RestHighLevelClient client = esService.getIndexClient();
         try {
-            IndexRequest indexRequest = new IndexRequest(ES_PROPERTY_INDEX, ES_PROPERTY_TYPE)
+            IndexRequest indexRequest = new IndexRequest(ES_PROPERTY_INDEX)
                     .id(property.getName())
                     .source(objectMapper.writeValueAsBytes(property), XContentType.JSON);
             indexRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
@@ -108,7 +108,7 @@ public class PropertyRepository implements CrudRepository<XmlProperty, String> {
         try {
             BulkRequest bulkRequest = new BulkRequest();
             for (XmlProperty property : properties) {
-                IndexRequest indexRequest = new IndexRequest(ES_PROPERTY_INDEX, ES_PROPERTY_TYPE)
+                IndexRequest indexRequest = new IndexRequest(ES_PROPERTY_INDEX)
                         .id(property.getName())
                         .source(objectMapper.writeValueAsBytes(property), XContentType.JSON);
                 bulkRequest.add(indexRequest);
@@ -153,8 +153,8 @@ public class PropertyRepository implements CrudRepository<XmlProperty, String> {
             if(present) {
                 deleteById(propertyName);
             }
-            updateRequest = new UpdateRequest(ES_PROPERTY_INDEX, ES_PROPERTY_TYPE, property.getName());
-            IndexRequest indexRequest = new IndexRequest(ES_PROPERTY_INDEX, ES_PROPERTY_TYPE)
+            updateRequest = new UpdateRequest(ES_PROPERTY_INDEX, property.getName());
+            IndexRequest indexRequest = new IndexRequest(ES_PROPERTY_INDEX)
                     .id(property.getName())
                     .source(objectMapper.writeValueAsBytes(property), XContentType.JSON);
             updateRequest.doc(objectMapper.writeValueAsBytes(property), XContentType.JSON).upsert(indexRequest);
@@ -192,13 +192,13 @@ public class PropertyRepository implements CrudRepository<XmlProperty, String> {
         BulkRequest bulkRequest = new BulkRequest();
         try {
             for (XmlProperty property : properties) {
-                UpdateRequest updateRequest = new UpdateRequest(ES_PROPERTY_INDEX, ES_PROPERTY_TYPE, property.getName());
+                UpdateRequest updateRequest = new UpdateRequest(ES_PROPERTY_INDEX, property.getName());
 
                 Optional<XmlProperty> existingProperty = findById(property.getName());
                 if (existingProperty.isPresent()) {
                     updateRequest.doc(objectMapper.writeValueAsBytes(property), XContentType.JSON);
                 } else {
-                    IndexRequest indexRequest = new IndexRequest(ES_PROPERTY_INDEX, ES_PROPERTY_TYPE)
+                    IndexRequest indexRequest = new IndexRequest(ES_PROPERTY_INDEX)
                             .id(property.getName())
                             .source(objectMapper.writeValueAsBytes(property), XContentType.JSON);
                     updateRequest.doc(objectMapper.writeValueAsBytes(property), XContentType.JSON).upsert(indexRequest);
@@ -248,7 +248,7 @@ public class PropertyRepository implements CrudRepository<XmlProperty, String> {
      */
     public Optional<XmlProperty> findById(String propertyId, boolean withChannels) {
         RestHighLevelClient client = esService.getSearchClient();
-        GetRequest getRequest = new GetRequest(ES_PROPERTY_INDEX, ES_PROPERTY_TYPE, propertyId);
+        GetRequest getRequest = new GetRequest(ES_PROPERTY_INDEX, propertyId);
         try {
             GetResponse response = client.get(getRequest, RequestOptions.DEFAULT);
             if (response.isExists()) {
@@ -283,7 +283,7 @@ public class PropertyRepository implements CrudRepository<XmlProperty, String> {
     public boolean existsById(String id) {
 
         RestHighLevelClient client = esService.getSearchClient();
-        GetRequest getRequest = new GetRequest(ES_PROPERTY_INDEX, ES_PROPERTY_TYPE, id);
+        GetRequest getRequest = new GetRequest(ES_PROPERTY_INDEX, id);
         getRequest.fetchSourceContext(new FetchSourceContext(false));
         getRequest.storedFields("_none_");
         try {
@@ -306,7 +306,6 @@ public class PropertyRepository implements CrudRepository<XmlProperty, String> {
 
         SearchRequest searchRequest = new SearchRequest();
         searchRequest.indices(ES_PROPERTY_INDEX);
-        searchRequest.types(ES_PROPERTY_TYPE);
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         // TODO use of scroll will be necessary
@@ -342,7 +341,7 @@ public class PropertyRepository implements CrudRepository<XmlProperty, String> {
         MultiGetRequest request = new MultiGetRequest();
 
         for (String propertyId : propertyIds) {
-            request.add(new MultiGetRequest.Item(ES_PROPERTY_INDEX, ES_PROPERTY_TYPE, propertyId));
+            request.add(new MultiGetRequest.Item(ES_PROPERTY_INDEX, propertyId));
         }
         try {
             List<XmlProperty> foundProperties = new ArrayList<XmlProperty>();
@@ -370,12 +369,12 @@ public class PropertyRepository implements CrudRepository<XmlProperty, String> {
     /**
      * delete the given property by property name
      * 
-     * @param property - property to be deleted
+     * @param propertyName - property to be deleted
      */
     @Override
     public void deleteById(String propertyName) {
         RestHighLevelClient client = esService.getIndexClient();
-        DeleteRequest request = new DeleteRequest(ES_PROPERTY_INDEX, ES_PROPERTY_TYPE, propertyName);
+        DeleteRequest request = new DeleteRequest(ES_PROPERTY_INDEX, propertyName);
         request.setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
 
         try {
