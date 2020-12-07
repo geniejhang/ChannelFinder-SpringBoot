@@ -46,6 +46,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     String ldap_groups_search_base;
     @Value("${ldap.groups.search.pattern}")
     String ldap_groups_search_pattern;
+    @Value("${ldap.ctx.user.dn}")
+    String ldap_ctx_user_dn;
+    @Value("${ldap.ctx.pw}")
+    String ldap_ctx_pw;
 
     /**
      * Embedded LDAP configuration properties
@@ -80,6 +84,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
         if (ldap_enabled) {
             DefaultSpringSecurityContextSource contextSource = new DefaultSpringSecurityContextSource(ldap_url);
+            contextSource.setUserDn(ldap_ctx_user_dn);
+            contextSource.setPassword(ldap_ctx_pw);
             contextSource.afterPropertiesSet();
 
             DefaultLdapAuthoritiesPopulator myAuthPopulator = new DefaultLdapAuthoritiesPopulator(contextSource, ldap_groups_search_base);
