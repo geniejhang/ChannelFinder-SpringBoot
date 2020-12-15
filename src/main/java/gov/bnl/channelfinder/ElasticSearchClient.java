@@ -54,14 +54,14 @@ public class ElasticSearchClient implements ServletContextListener {
 
     public RestHighLevelClient getSearchClient() {
         if(searchClient == null) {
-            searchClient = new RestHighLevelClient(RestClient.builder(new HttpHost(host, port, "http")));
+            searchClient = new RestHighLevelClient(RestClient.builder(new HttpHost(host.trim(), port, "http")));
         }
         return searchClient;
     }
 
     public RestHighLevelClient getIndexClient() {
         if(indexClient == null) {
-            indexClient = new RestHighLevelClient(RestClient.builder(new HttpHost(host, port, "http")));
+            indexClient = new RestHighLevelClient(RestClient.builder(new HttpHost(host.trim(), port, "http")));
         }
         return indexClient;
     }
