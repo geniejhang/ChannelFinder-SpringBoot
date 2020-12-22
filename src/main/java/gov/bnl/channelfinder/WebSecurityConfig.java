@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.ldap.core.LdapTemplate;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -40,12 +41,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     String ldap_url;
     @Value("${ldap.base.dn}")
     String ldap_base_dn;
-    @Value("${ldap.user.dn.pattern}")
-    String ldap_user_dn_pattern;
+    @Value("${ldap.user.dn.filter}")
+    String ldap_user_dn_filter;
     @Value("${ldap.groups.search.base}")
     String ldap_groups_search_base;
-    @Value("${ldap.groups.search.pattern}")
-    String ldap_groups_search_pattern;
+    @Value("${ldap.groups.search.filter}")
+    String ldap_groups_search_filter;
     @Value("${ldap.ctx.user.dn}")
     String ldap_ctx_user_dn;
     @Value("${ldap.ctx.pw}")
@@ -82,21 +83,29 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(AuthenticationManagerBuilder auth) throws Exception {
 
+        if (demo_auth_enabled) {
+            auth.inMemoryAuthentication()
+                    .withUser("admin").password(encoder().encode("adminPass")).roles("ADMIN").and()
+                    .withUser("user").password(encoder().encode("userPass")).roles("USER");
+        }
+
         if (ldap_enabled) {
             DefaultSpringSecurityContextSource contextSource = new DefaultSpringSecurityContextSource(ldap_url);
             contextSource.setUserDn(ldap_ctx_user_dn);
             contextSource.setPassword(ldap_ctx_pw);
+            contextSource.setReferral("follow");
             contextSource.afterPropertiesSet();
 
             DefaultLdapAuthoritiesPopulator myAuthPopulator = new DefaultLdapAuthoritiesPopulator(contextSource, ldap_groups_search_base);
-            myAuthPopulator.setGroupSearchFilter(ldap_groups_search_pattern);
+            myAuthPopulator.setGroupSearchFilter(ldap_groups_search_filter);
             myAuthPopulator.setSearchSubtree(true);
             myAuthPopulator.setIgnorePartialResultException(true);
 
             auth.ldapAuthentication()
-                .userDnPatterns(ldap_user_dn_pattern)
-                .ldapAuthoritiesPopulator(myAuthPopulator)
-                .contextSource(contextSource);
+                    .userSearchBase(ldap_base_dn)
+                    .userSearchFilter(ldap_user_dn_filter)
+                    .ldapAuthoritiesPopulator(myAuthPopulator)
+                    .contextSource(contextSource);
         }
 
         if (embedded_ldap_enabled) {
@@ -115,12 +124,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                     .groupSearchBase("ou=Group")
                     .contextSource(contextSource);
 
-        }
-
-        if (demo_auth_enabled) {
-            auth.inMemoryAuthentication()
-                    .withUser("admin").password(encoder().encode("adminPass")).roles("ADMIN").and()
-                    .withUser("user").password(encoder().encode("userPass")).roles("USER");
         }
     }
 
