@@ -47,9 +47,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     String ldap_groups_search_base;
     @Value("${ldap.groups.search.filter}")
     String ldap_groups_search_filter;
-    @Value("${ldap.ctx.user.dn}")
+    @Value("${ldap.ctx.user.dn:null}")
     String ldap_ctx_user_dn;
-    @Value("${ldap.ctx.pw}")
+    @Value("${ldap.ctx.pw:null}")
     String ldap_ctx_pw;
 
     /**
