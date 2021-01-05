@@ -39,13 +39,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     boolean ldap_enabled;
     @Value("${ldap.urls:ldaps://localhost:389/}")
     String ldap_url;
-    @Value("${ldap.base.dn}")
+    @Value("${ldap.base.dn:null}")
     String ldap_base_dn;
-    @Value("${ldap.user.dn.filter}")
+    @Value("${ldap.user.dn.filter:null}")
     String ldap_user_dn_filter;
-    @Value("${ldap.groups.search.base}")
+    @Value("${ldap.groups.search.base:null}")
     String ldap_groups_search_base;
-    @Value("${ldap.groups.search.filter}")
+    @Value("${ldap.groups.search.filter:null}")
     String ldap_groups_search_filter;
     @Value("${ldap.ctx.user.dn:null}")
     String ldap_ctx_user_dn;
