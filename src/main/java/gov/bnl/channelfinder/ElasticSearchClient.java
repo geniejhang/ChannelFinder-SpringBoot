@@ -51,7 +51,7 @@ public class ElasticSearchClient implements ServletContextListener {
     private String host;
     @Value("${elasticsearch.http.port:9200}")
     private int port;
-    @Value("${elasticsearch.http.timeout:30000")
+    @Value("${elasticsearch.http.timeout:30000}")
     private int timeout;
 
     public RestHighLevelClient getSearchClient() {
