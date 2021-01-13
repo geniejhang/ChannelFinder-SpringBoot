@@ -51,17 +51,19 @@ public class ElasticSearchClient implements ServletContextListener {
     private String host;
     @Value("${elasticsearch.http.port:9200}")
     private int port;
+    @Value("${elasticsearch.http.timeout:30000")
+    private int timeout;
 
     public RestHighLevelClient getSearchClient() {
         if(searchClient == null) {
-            searchClient = new RestHighLevelClient(RestClient.builder(new HttpHost(host.trim(), port, "http")));
+            searchClient = new RestHighLevelClient(RestClient.builder(new HttpHost(host.trim(), port, "http")).setMaxRetryTimeoutMillis(timeout));
         }
         return searchClient;
     }
 
     public RestHighLevelClient getIndexClient() {
         if(indexClient == null) {
-            indexClient = new RestHighLevelClient(RestClient.builder(new HttpHost(host.trim(), port, "http")));
+            indexClient = new RestHighLevelClient(RestClient.builder(new HttpHost(host.trim(), port, "http")).setMaxRetryTimeoutMillis(timeout));
         }
         return indexClient;
     }
