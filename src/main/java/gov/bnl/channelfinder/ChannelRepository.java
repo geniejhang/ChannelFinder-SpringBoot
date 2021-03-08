@@ -66,8 +66,8 @@ import gov.bnl.channelfinder.XmlTag.OnlyXmlTag;
 @Repository
 @Configuration
 public class ChannelRepository implements CrudRepository<XmlChannel, String> {
-    @Value("${server.request.buffersize:1073741824}")
-    static int REQUEST_BUFFERSIZE = 1*1024*1024*1024;
+    @Value("${server.request.buffersize:104857600}")
+    static int REQUEST_BUFFERSIZE;
 
     private static final RequestOptions CUSTOM_BUFFERSIZE_REQUESTOPTIONS;
     static {
