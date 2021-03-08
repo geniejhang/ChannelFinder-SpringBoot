@@ -57,6 +57,9 @@ public class ChannelScroll {
     @Value("${elasticsearch.channel.type:cf_channel}")
     private String ES_CHANNEL_TYPE;
 
+    @Value("{$elasticsearch.scroll.timeout:30L")
+    private long ES_SCROLL_TIMEOUT;
+
     @Autowired
     ElasticSearchClient esService;
 
@@ -105,7 +108,7 @@ public class ChannelScroll {
             SearchRequest searchRequest = new SearchRequest(ES_CHANNEL_INDEX);
             SearchResponse searchResponse;
             int size = 100;
-            final Scroll scroll = new Scroll(TimeValue.timeValueMinutes(30L));
+            final Scroll scroll = new Scroll(TimeValue.timeValueMinutes(ES_SCROLL_TIMEOUT));
             
             if(scrollId == null) {
                 BoolQueryBuilder qb = boolQuery();
