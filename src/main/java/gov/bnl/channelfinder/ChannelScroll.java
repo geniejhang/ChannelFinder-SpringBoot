@@ -57,7 +57,7 @@ public class ChannelScroll {
     @Value("${elasticsearch.channel.type:cf_channel}")
     private String ES_CHANNEL_TYPE;
 
-    @Value("{$elasticsearch.scroll.timeout:30L")
+    @Value("${elasticsearch.scroll.timeout:30L}")
     private long ES_SCROLL_TIMEOUT;
 
     @Autowired
