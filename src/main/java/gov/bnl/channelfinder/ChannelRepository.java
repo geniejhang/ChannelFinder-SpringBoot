@@ -67,12 +67,19 @@ import gov.bnl.channelfinder.XmlTag.OnlyXmlTag;
 @Configuration
 public class ChannelRepository implements CrudRepository<XmlChannel, String> {
     @Value("${server.request.buffersize:104857600}")
-    static int REQUEST_BUFFERSIZE;
+    private int request_buffersize;
+
+    static int REQUEST_BUFFERSIZE_STATIC;
+
+    @Value("${server.request.buffersize:104857600}")
+    public void setBufferSizeStatic(int size) {
+        ChannelRepository.REQUEST_BUFFERSIZE_STATIC = size;
+    }
 
     private static final RequestOptions CUSTOM_BUFFERSIZE_REQUESTOPTIONS;
     static {
         RequestOptions.Builder builder = RequestOptions.DEFAULT.toBuilder();
-        builder.setHttpAsyncResponseConsumerFactory(new HttpAsyncResponseConsumerFactory.HeapBufferedResponseConsumerFactory(REQUEST_BUFFERSIZE));
+        builder.setHttpAsyncResponseConsumerFactory(new HttpAsyncResponseConsumerFactory.HeapBufferedResponseConsumerFactory(REQUEST_BUFFERSIZE_STATIC));
         CUSTOM_BUFFERSIZE_REQUESTOPTIONS = builder.build();
     }
 
