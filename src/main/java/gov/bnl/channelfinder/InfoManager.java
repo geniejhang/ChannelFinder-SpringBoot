@@ -10,9 +10,9 @@ import java.util.TreeMap;
 import java.util.logging.Level;
 
 import org.elasticsearch.Version;
-import org.elasticsearch.action.main.MainResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.client.core.MainResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -54,9 +54,9 @@ public class InfoManager {
             MainResponse response = client.info(RequestOptions.DEFAULT);
             
             elasticInfo.put("status", "Connected");
-            elasticInfo.put("clusterName", response.getClusterName().value());
+            elasticInfo.put("clusterName", response.getClusterName());
             elasticInfo.put("clusterUuid", response.getClusterUuid());
-            Version version = response.getVersion();
+            MainResponse.Version version = response.getVersion();
             elasticInfo.put("version", version.toString());
         } catch (IOException e) {
             Application.logger.log(Level.WARNING, "Failed to create ChannelFinder service info resource.", e);
