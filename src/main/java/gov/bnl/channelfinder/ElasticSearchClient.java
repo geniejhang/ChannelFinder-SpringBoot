@@ -26,7 +26,6 @@ import org.apache.http.HttpHost;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.client.transport.TransportClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -56,14 +55,20 @@ public class ElasticSearchClient implements ServletContextListener {
 
     public RestHighLevelClient getSearchClient() {
         if(searchClient == null) {
-            searchClient = new RestHighLevelClient(RestClient.builder(new HttpHost(host.trim(), port, "http")).setMaxRetryTimeoutMillis(timeout));
+            searchClient = new RestHighLevelClient(
+                    RestClient.builder(new HttpHost(host.trim(), port, "http"))
+                            .setRequestConfigCallback(requestConfigBuilder -> requestConfigBuilder.setSocketTimeout(timeout))
+            );
         }
         return searchClient;
     }
 
     public RestHighLevelClient getIndexClient() {
         if(indexClient == null) {
-            indexClient = new RestHighLevelClient(RestClient.builder(new HttpHost(host.trim(), port, "http")).setMaxRetryTimeoutMillis(timeout));
+            indexClient = new RestHighLevelClient(
+                    RestClient.builder(new HttpHost(host.trim(), port, "http"))
+                            .setRequestConfigCallback(requestConfigBuilder -> requestConfigBuilder.setSocketTimeout(timeout))
+            );
         }
         return indexClient;
     }
