@@ -56,8 +56,6 @@ public class TagRepository implements CrudRepository<XmlTag, String> {
 
     @Value("${elasticsearch.tag.index:cf_tags}")
     private String ES_TAG_INDEX;
-    @Value("${elasticsearch.tag.type:cf_tag}")
-    private String ES_TAG_TYPE;
 
     @Autowired
     ElasticSearchClient esService;
