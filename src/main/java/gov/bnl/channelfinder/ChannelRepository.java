@@ -80,8 +80,6 @@ public class ChannelRepository implements CrudRepository<XmlChannel, String> {
 
     @Value("${elasticsearch.channel.index:channelfinder}")
     private String ES_CHANNEL_INDEX;
-    @Value("${elasticsearch.channel.type:cf_channel}")
-    private String ES_CHANNEL_TYPE;
 
 
     @Autowired
