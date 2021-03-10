@@ -63,23 +63,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.bnl.channelfinder.XmlProperty.OnlyXmlProperty;
 import gov.bnl.channelfinder.XmlTag.OnlyXmlTag;
 
+import javax.annotation.PostConstruct;
+
 @Repository
 @Configuration
 public class ChannelRepository implements CrudRepository<XmlChannel, String> {
-    @Value("${server.request.buffersize:104857600}")
-    private int request_buffersize;
-
-    static int REQUEST_BUFFERSIZE_STATIC;
 
     @Value("${server.request.buffersize:104857600}")
-    public void setBufferSizeStatic(int size) {
-        ChannelRepository.REQUEST_BUFFERSIZE_STATIC = size;
-    }
+    private int REQUEST_BUFFERSIZE;
 
-    private static final RequestOptions CUSTOM_BUFFERSIZE_REQUESTOPTIONS;
-    static {
+    private RequestOptions CUSTOM_BUFFERSIZE_REQUESTOPTIONS;
+
+    @PostConstruct
+    public void createCustomBuffersizeRequestOptions() {
         RequestOptions.Builder builder = RequestOptions.DEFAULT.toBuilder();
-        builder.setHttpAsyncResponseConsumerFactory(new HttpAsyncResponseConsumerFactory.HeapBufferedResponseConsumerFactory(REQUEST_BUFFERSIZE_STATIC));
+        builder.setHttpAsyncResponseConsumerFactory(new HttpAsyncResponseConsumerFactory.HeapBufferedResponseConsumerFactory(REQUEST_BUFFERSIZE));
         CUSTOM_BUFFERSIZE_REQUESTOPTIONS = builder.build();
     }
 
