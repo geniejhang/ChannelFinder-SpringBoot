@@ -90,6 +90,9 @@ public class PopulateService {
     @Autowired
     ElasticSearchClient esService;
 
+    @Autowired
+    CustomRequestOptions customRequestOptions;
+
     @Value("${elasticsearch.channel.index:channelfinder}")
     private String ES_CHANNEL_INDEX;
     @Value("${elasticsearch.channel.type:cf_channel}")
@@ -148,7 +151,7 @@ public class PopulateService {
                 bulkRequest.add(new DeleteRequest(ES_PROPERTY_INDEX, property.getName()));
             }
             bulkRequest.setRefreshPolicy(RefreshPolicy.IMMEDIATE);
-            BulkResponse bulkResponse = client.bulk(bulkRequest, new CustomRequestOptions().largeBufferSizeRequestOption());
+            BulkResponse bulkResponse = client.bulk(bulkRequest, customRequestOptions.largeBufferSizeRequestOption());
             if (bulkResponse.hasFailures()) {
                 log.warning(bulkResponse.buildFailureMessage());
             }
@@ -214,7 +217,7 @@ public class PopulateService {
                 bulkRequest.add(updateRequest);
             }
             bulkRequest.setRefreshPolicy(RefreshPolicy.IMMEDIATE);
-            BulkResponse bulkResponse = client.bulk(bulkRequest, new CustomRequestOptions().largeBufferSizeRequestOption());
+            BulkResponse bulkResponse = client.bulk(bulkRequest, customRequestOptions.largeBufferSizeRequestOption());
             if (bulkResponse.hasFailures()) {
                 log.info(bulkResponse.buildFailureMessage());
             } else {
@@ -282,7 +285,7 @@ public class PopulateService {
             String prepare = "|Prepare: " + (System.currentTimeMillis() - start) + "|";
             start = System.currentTimeMillis();
             bulkRequest.setRefreshPolicy(RefreshPolicy.IMMEDIATE);
-            BulkResponse bulkResponse = client.bulk(bulkRequest, new CustomRequestOptions().largeBufferSizeRequestOption());
+            BulkResponse bulkResponse = client.bulk(bulkRequest, customRequestOptions.largeBufferSizeRequestOption());
             String execute = "|Execute: " + (System.currentTimeMillis() - start) + "|";
             log.info("Inserted SR cell " + cell + " " + prepare + " " + execute);
             if(bulkResponse.hasFailures()){
@@ -344,7 +347,7 @@ public class PopulateService {
             String prepare = "|Prepare: " + (System.currentTimeMillis() - start) + "|";
             start = System.currentTimeMillis();
             bulkRequest.setRefreshPolicy(RefreshPolicy.IMMEDIATE);
-            BulkResponse bulkResponse = client.bulk(bulkRequest, new CustomRequestOptions().largeBufferSizeRequestOption());
+            BulkResponse bulkResponse = client.bulk(bulkRequest, customRequestOptions.largeBufferSizeRequestOption());
             String execute = "|Execute: " + (System.currentTimeMillis() - start) + "|";
             log.info("Inserted BO cell " + cell + " " + prepare + " " + execute);
             if(bulkResponse.hasFailures()){

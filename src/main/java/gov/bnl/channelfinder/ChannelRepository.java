@@ -72,6 +72,9 @@ public class ChannelRepository implements CrudRepository<XmlChannel, String> {
     @Autowired
     ElasticSearchClient esService;
 
+    @Autowired
+    CustomRequestOptions customRequestOption;
+
     ObjectMapper objectMapper = new ObjectMapper();
 
     /**
@@ -88,7 +91,7 @@ public class ChannelRepository implements CrudRepository<XmlChannel, String> {
                     .id(channel.getName())
                     .source(objectMapper.writeValueAsBytes(channel), XContentType.JSON);
             indexRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
-            IndexResponse indexResponse = client.index(indexRequest, new CustomRequestOptions().largeBufferSizeRequestOption());
+            IndexResponse indexResponse = client.index(indexRequest, customRequestOption.largeBufferSizeRequestOption());
             /// verify the creation of the channel
             Result result = indexResponse.getResult();
             if (result.equals(Result.CREATED) || result.equals(Result.UPDATED)) {
@@ -121,7 +124,7 @@ public class ChannelRepository implements CrudRepository<XmlChannel, String> {
             }
 
             bulkRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
-            BulkResponse bulkResponse = client.bulk(bulkRequest, new CustomRequestOptions().largeBufferSizeRequestOption());
+            BulkResponse bulkResponse = client.bulk(bulkRequest, customRequestOption.largeBufferSizeRequestOption());
             // verify the creation of the channels
             if (bulkResponse.hasFailures()) {
                 // Failed to create all the channels
@@ -188,7 +191,7 @@ public class ChannelRepository implements CrudRepository<XmlChannel, String> {
                     .source(objectMapper.writeValueAsBytes(channel), XContentType.JSON);
             updateRequest.doc(objectMapper.writeValueAsBytes(channel), XContentType.JSON).upsert(indexRequest);
             updateRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
-            UpdateResponse updateResponse = client.update(updateRequest, new CustomRequestOptions().largeBufferSizeRequestOption());
+            UpdateResponse updateResponse = client.update(updateRequest, customRequestOption.largeBufferSizeRequestOption());
             // verify the creation of the channel
             Result result = updateResponse.getResult();
             if (result.equals(Result.CREATED) || result.equals(Result.UPDATED) || result.equals(Result.NOOP)) {
@@ -258,7 +261,7 @@ public class ChannelRepository implements CrudRepository<XmlChannel, String> {
             }
 
             bulkRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
-            BulkResponse bulkResponse = client.bulk(bulkRequest, new CustomRequestOptions().largeBufferSizeRequestOption());
+            BulkResponse bulkResponse = client.bulk(bulkRequest, customRequestOption.largeBufferSizeRequestOption());
             if (bulkResponse.hasFailures()) {
                 // Failed to create/update all the channels
                 throw new Exception();
@@ -290,7 +293,7 @@ public class ChannelRepository implements CrudRepository<XmlChannel, String> {
         RestHighLevelClient client = esService.getSearchClient();
         GetRequest getRequest = new GetRequest(ES_CHANNEL_INDEX, channelId);
         try {
-            GetResponse response = client.get(getRequest, new CustomRequestOptions().largeBufferSizeRequestOption());
+            GetResponse response = client.get(getRequest, customRequestOption.largeBufferSizeRequestOption());
             if (response.isExists()) {
                 XmlChannel channel = objectMapper.readValue(response.getSourceAsBytesRef().streamInput(), XmlChannel.class);
                 return Optional.of(channel);
@@ -314,7 +317,7 @@ public class ChannelRepository implements CrudRepository<XmlChannel, String> {
         }
         try {
             long start = System.currentTimeMillis();
-            MultiGetResponse response = client.mget(request, new CustomRequestOptions().largeBufferSizeRequestOption());
+            MultiGetResponse response = client.mget(request, customRequestOption.largeBufferSizeRequestOption());
             for (MultiGetItemResponse multiGetItemResponse : response) {
                 if (!multiGetItemResponse.getResponse().isExists())
                     return false;
@@ -336,7 +339,7 @@ public class ChannelRepository implements CrudRepository<XmlChannel, String> {
         getRequest.fetchSourceContext(new FetchSourceContext(false));
         getRequest.storedFields("_none_");
         try {
-            return client.exists(getRequest, new CustomRequestOptions().largeBufferSizeRequestOption());
+            return client.exists(getRequest, customRequestOption.largeBufferSizeRequestOption());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -361,7 +364,7 @@ public class ChannelRepository implements CrudRepository<XmlChannel, String> {
         searchRequest.source(searchSourceBuilder.query(QueryBuilders.matchAllQuery()));
 
         try {
-            SearchResponse searchResponse = client.search(searchRequest, new CustomRequestOptions().largeBufferSizeRequestOption());
+            SearchResponse searchResponse = client.search(searchRequest, customRequestOption.largeBufferSizeRequestOption());
             if (searchResponse.status().equals(RestStatus.OK)) {
                 List<XmlChannel> result = new ArrayList<XmlChannel>();
                 for (SearchHit hit : searchResponse.getHits()) {
@@ -392,7 +395,7 @@ public class ChannelRepository implements CrudRepository<XmlChannel, String> {
         }
         try {
             List<XmlChannel> foundChannels = new ArrayList<XmlChannel>();
-            MultiGetResponse response = esService.getSearchClient().mget(request, new CustomRequestOptions().largeBufferSizeRequestOption());
+            MultiGetResponse response = esService.getSearchClient().mget(request, customRequestOption.largeBufferSizeRequestOption());
             for (MultiGetItemResponse multiGetItemResponse : response) {
                 if (!multiGetItemResponse.isFailed()) {
                     foundChannels.add(objectMapper.readValue(
@@ -426,7 +429,7 @@ public class ChannelRepository implements CrudRepository<XmlChannel, String> {
         request.setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
 
         try {
-            DeleteResponse response = client.delete(request, new CustomRequestOptions().largeBufferSizeRequestOption());
+            DeleteResponse response = client.delete(request, customRequestOption.largeBufferSizeRequestOption());
             Result result = response.getResult();
             if (!result.equals(Result.DELETED)) {
                 throw new Exception();
@@ -543,7 +546,7 @@ public class ChannelRepository implements CrudRepository<XmlChannel, String> {
             searchSourceBuilder.sort(SortBuilders.fieldSort("name").order(SortOrder.ASC));
             searchRequest.source(searchSourceBuilder);
 
-            final SearchResponse searchResponse = client.search(searchRequest, new CustomRequestOptions().largeBufferSizeRequestOption());
+            final SearchResponse searchResponse = client.search(searchRequest, customRequestOption.largeBufferSizeRequestOption());
             performance.append(
                     "|query:(" + searchResponse.getHits().getTotalHits() + ")" + (System.currentTimeMillis() - start));
             start = System.currentTimeMillis();

@@ -63,6 +63,9 @@ public class PropertyRepository implements CrudRepository<XmlProperty, String> {
     @Autowired
     ChannelRepository channelRepository;
 
+    @Autowired
+    CustomRequestOptions customRequestOptions;
+
     ObjectMapper objectMapper = new ObjectMapper().addMixIn(XmlProperty.class, OnlyNameOwnerXmlProperty.class);
 
     /**
@@ -79,7 +82,7 @@ public class PropertyRepository implements CrudRepository<XmlProperty, String> {
                     .id(property.getName())
                     .source(objectMapper.writeValueAsBytes(property), XContentType.JSON);
             indexRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
-            IndexResponse indexResponse = client.index(indexRequest, new CustomRequestOptions().largeBufferSizeRequestOption());
+            IndexResponse indexResponse = client.index(indexRequest, customRequestOptions.largeBufferSizeRequestOption());
             /// verify the creation of the property
             Result result = indexResponse.getResult();
             if (result.equals(Result.CREATED) || result.equals(Result.UPDATED)) {
@@ -112,7 +115,7 @@ public class PropertyRepository implements CrudRepository<XmlProperty, String> {
             }
 
             bulkRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
-            BulkResponse bulkResponse = client.bulk(bulkRequest, new CustomRequestOptions().largeBufferSizeRequestOption());
+            BulkResponse bulkResponse = client.bulk(bulkRequest, customRequestOptions.largeBufferSizeRequestOption());
             /// verify the creation of the properties
             if (bulkResponse.hasFailures()) {
                 // Failed to create all the properties
@@ -156,7 +159,7 @@ public class PropertyRepository implements CrudRepository<XmlProperty, String> {
                     .source(objectMapper.writeValueAsBytes(property), XContentType.JSON);
             updateRequest.doc(objectMapper.writeValueAsBytes(property), XContentType.JSON).upsert(indexRequest);
             updateRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
-            UpdateResponse updateResponse = client.update(updateRequest, new CustomRequestOptions().largeBufferSizeRequestOption());
+            UpdateResponse updateResponse = client.update(updateRequest, customRequestOptions.largeBufferSizeRequestOption());
             /// verify the updating/saving of the property
             Result result = updateResponse.getResult();
             if (result.equals(Result.CREATED) || result.equals(Result.UPDATED) || result.equals(Result.NOOP)) {
@@ -204,7 +207,7 @@ public class PropertyRepository implements CrudRepository<XmlProperty, String> {
             }
 
             bulkRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
-            BulkResponse bulkResponse = client.bulk(bulkRequest, new CustomRequestOptions().largeBufferSizeRequestOption());
+            BulkResponse bulkResponse = client.bulk(bulkRequest, customRequestOptions.largeBufferSizeRequestOption());
             if (bulkResponse.hasFailures()) {
                 // Failed to create/update all the properties
                 throw new Exception();
@@ -247,7 +250,7 @@ public class PropertyRepository implements CrudRepository<XmlProperty, String> {
         RestHighLevelClient client = esService.getSearchClient();
         GetRequest getRequest = new GetRequest(ES_PROPERTY_INDEX, propertyId);
         try {
-            GetResponse response = client.get(getRequest, new CustomRequestOptions().largeBufferSizeRequestOption());
+            GetResponse response = client.get(getRequest, customRequestOptions.largeBufferSizeRequestOption());
             if (response.isExists()) {
                 XmlProperty property = objectMapper.readValue(response.getSourceAsBytesRef().streamInput(), XmlProperty.class);
                 if(withChannels) {
@@ -284,7 +287,7 @@ public class PropertyRepository implements CrudRepository<XmlProperty, String> {
         getRequest.fetchSourceContext(new FetchSourceContext(false));
         getRequest.storedFields("_none_");
         try {
-            return client.exists(getRequest, new CustomRequestOptions().largeBufferSizeRequestOption());
+            return client.exists(getRequest, customRequestOptions.largeBufferSizeRequestOption());
         } catch (IOException e) {
             log.log(Level.SEVERE, "Failed to check if property exists by id: " + id, e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
@@ -311,7 +314,7 @@ public class PropertyRepository implements CrudRepository<XmlProperty, String> {
         searchRequest.source(searchSourceBuilder.query(QueryBuilders.matchAllQuery()));
 
         try {
-            SearchResponse searchResponse = client.search(searchRequest, new CustomRequestOptions().largeBufferSizeRequestOption());
+            SearchResponse searchResponse = client.search(searchRequest, customRequestOptions.largeBufferSizeRequestOption());
             if (searchResponse.status().equals(RestStatus.OK)) {
                 List<XmlProperty> result = new ArrayList<XmlProperty>();
                 for (SearchHit hit : searchResponse.getHits()) {
@@ -342,7 +345,7 @@ public class PropertyRepository implements CrudRepository<XmlProperty, String> {
         }
         try {
             List<XmlProperty> foundProperties = new ArrayList<XmlProperty>();
-            MultiGetResponse response = esService.getSearchClient().mget(request, new CustomRequestOptions().largeBufferSizeRequestOption());
+            MultiGetResponse response = esService.getSearchClient().mget(request, customRequestOptions.largeBufferSizeRequestOption());
             for (MultiGetItemResponse multiGetItemResponse : response) {
                 if (!multiGetItemResponse.isFailed()) {
                     foundProperties.add(objectMapper.readValue(
@@ -375,7 +378,7 @@ public class PropertyRepository implements CrudRepository<XmlProperty, String> {
         request.setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
 
         try {
-            DeleteResponse response = client.delete(request, new CustomRequestOptions().largeBufferSizeRequestOption());
+            DeleteResponse response = client.delete(request, customRequestOptions.largeBufferSizeRequestOption());
             Result result = response.getResult();
             if (!result.equals(Result.DELETED)) 
                 throw new Exception();

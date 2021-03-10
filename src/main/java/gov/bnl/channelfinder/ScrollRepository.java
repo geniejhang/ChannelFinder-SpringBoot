@@ -61,6 +61,9 @@ public class ScrollRepository {
     @Autowired
     ElasticSearchClient esService;
 
+    @Autowired
+    CustomRequestOptions customRequestOptions;
+
 
     /**
      * GET method for retrieving a collection of Channel instances, based on a
@@ -168,12 +171,12 @@ public class ScrollRepository {
                 searchSourceBuilder.query(qb);
                 searchSourceBuilder.size(size);
                 searchRequest.source(searchSourceBuilder);
-                searchResponse = client.search(searchRequest, new CustomRequestOptions().largeBufferSizeRequestOption());
+                searchResponse = client.search(searchRequest, customRequestOptions.largeBufferSizeRequestOption());
 
             } else {
                 SearchScrollRequest scrollRequest = new SearchScrollRequest(scrollId);
                 scrollRequest.scroll(scroll);
-                searchResponse = client.scroll(scrollRequest, new CustomRequestOptions().largeBufferSizeRequestOption());
+                searchResponse = client.scroll(scrollRequest, customRequestOptions.largeBufferSizeRequestOption());
                 }
 
             scrollId = searchResponse.getScrollId();
@@ -197,7 +200,7 @@ public class ScrollRepository {
             if(searchHits.length < size) {
                 ClearScrollRequest clearScrollRequest = new ClearScrollRequest(); 
                 clearScrollRequest.addScrollId(scrollId);
-                ClearScrollResponse clearScrollResponse = client.clearScroll(clearScrollRequest, new CustomRequestOptions().largeBufferSizeRequestOption());
+                ClearScrollResponse clearScrollResponse = client.clearScroll(clearScrollRequest, customRequestOptions.largeBufferSizeRequestOption());
                 boolean succeeded = clearScrollResponse.isSucceeded();
             }
             

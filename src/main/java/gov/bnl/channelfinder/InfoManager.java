@@ -31,6 +31,9 @@ public class InfoManager {
     @Autowired
     ElasticSearchClient esService;
 
+    @Autowired
+    CustomRequestOptions customRequestOptions;
+
     private final static ObjectMapper objectMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
 
     /**
@@ -47,7 +50,7 @@ public class InfoManager {
         RestHighLevelClient client = esService.getSearchClient();
         Map<String, String> elasticInfo = new LinkedHashMap<String, String>();
         try {
-            MainResponse response = client.info(new CustomRequestOptions().largeBufferSizeRequestOption());
+            MainResponse response = client.info(customRequestOptions.largeBufferSizeRequestOption());
             
             elasticInfo.put("status", "Connected");
             elasticInfo.put("clusterName", response.getClusterName());
