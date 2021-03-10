@@ -148,7 +148,7 @@ public class PopulateService {
                 bulkRequest.add(new DeleteRequest(ES_PROPERTY_INDEX, property.getName()));
             }
             bulkRequest.setRefreshPolicy(RefreshPolicy.IMMEDIATE);
-            BulkResponse bulkResponse = client.bulk(bulkRequest, CustomRequestOptions.LARGE_BUFFERSIZE_REQUEST_OPTION);
+            BulkResponse bulkResponse = client.bulk(bulkRequest, new CustomRequestOptions().largeBufferSizeRequestOption());
             if (bulkResponse.hasFailures()) {
                 log.warning(bulkResponse.buildFailureMessage());
             }
@@ -214,7 +214,7 @@ public class PopulateService {
                 bulkRequest.add(updateRequest);
             }
             bulkRequest.setRefreshPolicy(RefreshPolicy.IMMEDIATE);
-            BulkResponse bulkResponse = client.bulk(bulkRequest, CustomRequestOptions.LARGE_BUFFERSIZE_REQUEST_OPTION);
+            BulkResponse bulkResponse = client.bulk(bulkRequest, new CustomRequestOptions().largeBufferSizeRequestOption());
             if (bulkResponse.hasFailures()) {
                 log.info(bulkResponse.buildFailureMessage());
             } else {
@@ -282,7 +282,7 @@ public class PopulateService {
             String prepare = "|Prepare: " + (System.currentTimeMillis() - start) + "|";
             start = System.currentTimeMillis();
             bulkRequest.setRefreshPolicy(RefreshPolicy.IMMEDIATE);
-            BulkResponse bulkResponse = client.bulk(bulkRequest, CustomRequestOptions.LARGE_BUFFERSIZE_REQUEST_OPTION);
+            BulkResponse bulkResponse = client.bulk(bulkRequest, new CustomRequestOptions().largeBufferSizeRequestOption());
             String execute = "|Execute: " + (System.currentTimeMillis() - start) + "|";
             log.info("Inserted SR cell " + cell + " " + prepare + " " + execute);
             if(bulkResponse.hasFailures()){
@@ -344,7 +344,7 @@ public class PopulateService {
             String prepare = "|Prepare: " + (System.currentTimeMillis() - start) + "|";
             start = System.currentTimeMillis();
             bulkRequest.setRefreshPolicy(RefreshPolicy.IMMEDIATE);
-            BulkResponse bulkResponse = client.bulk(bulkRequest, CustomRequestOptions.LARGE_BUFFERSIZE_REQUEST_OPTION);
+            BulkResponse bulkResponse = client.bulk(bulkRequest, new CustomRequestOptions().largeBufferSizeRequestOption());
             String execute = "|Execute: " + (System.currentTimeMillis() - start) + "|";
             log.info("Inserted BO cell " + cell + " " + prepare + " " + execute);
             if(bulkResponse.hasFailures()){

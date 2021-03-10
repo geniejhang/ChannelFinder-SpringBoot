@@ -47,7 +47,7 @@ public class InfoManager {
         RestHighLevelClient client = esService.getSearchClient();
         Map<String, String> elasticInfo = new LinkedHashMap<String, String>();
         try {
-            MainResponse response = client.info(CustomRequestOptions.LARGE_BUFFERSIZE_REQUEST_OPTION);
+            MainResponse response = client.info(new CustomRequestOptions().largeBufferSizeRequestOption());
             
             elasticInfo.put("status", "Connected");
             elasticInfo.put("clusterName", response.getClusterName());

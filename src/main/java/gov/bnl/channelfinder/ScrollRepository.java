@@ -168,12 +168,12 @@ public class ScrollRepository {
                 searchSourceBuilder.query(qb);
                 searchSourceBuilder.size(size);
                 searchRequest.source(searchSourceBuilder);
-                searchResponse = client.search(searchRequest, CustomRequestOptions.LARGE_BUFFERSIZE_REQUEST_OPTION);
+                searchResponse = client.search(searchRequest, new CustomRequestOptions().largeBufferSizeRequestOption());
 
             } else {
                 SearchScrollRequest scrollRequest = new SearchScrollRequest(scrollId);
                 scrollRequest.scroll(scroll);
-                searchResponse = client.scroll(scrollRequest, CustomRequestOptions.LARGE_BUFFERSIZE_REQUEST_OPTION);
+                searchResponse = client.scroll(scrollRequest, new CustomRequestOptions().largeBufferSizeRequestOption());
                 }
 
             scrollId = searchResponse.getScrollId();
@@ -197,7 +197,7 @@ public class ScrollRepository {
             if(searchHits.length < size) {
                 ClearScrollRequest clearScrollRequest = new ClearScrollRequest(); 
                 clearScrollRequest.addScrollId(scrollId);
-                ClearScrollResponse clearScrollResponse = client.clearScroll(clearScrollRequest, CustomRequestOptions.LARGE_BUFFERSIZE_REQUEST_OPTION);
+                ClearScrollResponse clearScrollResponse = client.clearScroll(clearScrollRequest, new CustomRequestOptions().largeBufferSizeRequestOption());
                 boolean succeeded = clearScrollResponse.isSucceeded();
             }
             

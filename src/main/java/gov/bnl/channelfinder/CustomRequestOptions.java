@@ -7,13 +7,11 @@ import org.springframework.beans.factory.annotation.Value;
 
 public class CustomRequestOptions {
     @Value("${server.request.buffersize:104857600}")
-    private int REQUEST_BUFFERSIZE;
+    private int bufferSize;
 
-    private RequestOptions largeBufferSizeRequestOption() {
+    public RequestOptions largeBufferSizeRequestOption() {
         Builder builder = RequestOptions.DEFAULT.toBuilder();
-        builder.setHttpAsyncResponseConsumerFactory(new HttpAsyncResponseConsumerFactory.HeapBufferedResponseConsumerFactory(REQUEST_BUFFERSIZE));
+        builder.setHttpAsyncResponseConsumerFactory(new HttpAsyncResponseConsumerFactory.HeapBufferedResponseConsumerFactory(bufferSize));
         return builder.build();
     }
-
-    public static final RequestOptions LARGE_BUFFERSIZE_REQUEST_OPTION = new CustomRequestOptions().largeBufferSizeRequestOption();
 }
