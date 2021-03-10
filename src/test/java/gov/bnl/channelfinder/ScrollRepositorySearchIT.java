@@ -17,12 +17,12 @@ import org.springframework.util.MultiValueMap;
 import gov.bnl.channelfinder.example.PopulateService;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest(ChannelScroll.class)
-public class ChannelScrollSearchIT {
+@WebMvcTest(ScrollRepository.class)
+public class ScrollRepositorySearchIT {
 
-    private static final Logger logger = Logger.getLogger(ChannelScrollSearchIT.class.getName());
+    private static final Logger logger = Logger.getLogger(ScrollRepositorySearchIT.class.getName());
     @Autowired
-    ChannelScroll channelScroll;
+    ScrollRepository scrollRepository;
 
     @Autowired
     TagRepository tagRepository;
@@ -59,7 +59,7 @@ public class ChannelScrollSearchIT {
         searchParameters.add("~name", "*");
 
         long start = System.currentTimeMillis();
-        XmlScroll scrollResult = channelScroll.query(searchParameters);
+        XmlScroll scrollResult = scrollRepository.query(searchParameters);
         logger.info("Completed the first scroll request in : " + (System.currentTimeMillis() - start) + "ms");
         int totalResult = 0;
         Double avg100 = 0.0;
@@ -71,7 +71,7 @@ public class ChannelScrollSearchIT {
         start = System.currentTimeMillis();
 
         while (scrollResult.getChannels().size() == 100) {
-            scrollResult = channelScroll.query(scrollResult.getId());
+            scrollResult = scrollRepository.query(scrollResult.getId());
             logger.fine("Retrieved channels " + totalResult + " to " + (totalResult + scrollResult.getChannels().size())
                     + " in : " + (System.currentTimeMillis() - start) + "ms");
             avg100 = (avg100 + (System.currentTimeMillis() - start)) / 2;
@@ -84,7 +84,7 @@ public class ChannelScrollSearchIT {
         logger.info("Rerun test with scroll size  = 1000");
         searchParameters.add("~size", "1000");
         start = System.currentTimeMillis();
-        scrollResult = channelScroll.query(searchParameters);
+        scrollResult = scrollRepository.query(searchParameters);
         logger.info("Completed the first scroll request in : " + (System.currentTimeMillis() - start) + "ms");
         totalResult = 0;
         Double avg1000 = 0.0;
@@ -96,7 +96,7 @@ public class ChannelScrollSearchIT {
         start = System.currentTimeMillis();
 
         while (scrollResult.getChannels().size() == 1000) {
-            scrollResult = channelScroll.query(scrollResult.getId());
+            scrollResult = scrollRepository.query(scrollResult.getId());
             logger.fine("Retrieved channels " + totalResult + " to " + (totalResult + scrollResult.getChannels().size())
                     + " in : " + (System.currentTimeMillis() - start) + "ms");
             avg1000 = (avg1000 + (System.currentTimeMillis() - start)) / 2;
@@ -110,7 +110,7 @@ public class ChannelScrollSearchIT {
         searchParameters.remove("~size");
         searchParameters.add("~size", "10000");
         start = System.currentTimeMillis();
-        scrollResult = channelScroll.query(searchParameters);
+        scrollResult = scrollRepository.query(searchParameters);
         logger.info("Completed the first scroll request in : " + (System.currentTimeMillis() - start) + "ms");
         totalResult = 0;
         Double avg10000 = 0.0;
@@ -122,7 +122,7 @@ public class ChannelScrollSearchIT {
         start = System.currentTimeMillis();
 
         while (scrollResult.getChannels().size() == 10000) {
-            scrollResult = channelScroll.query(scrollResult.getId());
+            scrollResult = scrollRepository.query(scrollResult.getId());
             logger.fine("Retrieved channels " + totalResult + " to " + (totalResult + scrollResult.getChannels().size())
                     + " in : " + (System.currentTimeMillis() - start) + "ms");
             avg10000 = (avg10000 + (System.currentTimeMillis() - start)) / 2;

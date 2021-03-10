@@ -3,14 +3,10 @@ package gov.bnl.channelfinder;
 import static gov.bnl.channelfinder.CFResourceDescriptors.CF_SERVICE_INFO;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.logging.Level;
 
-import org.elasticsearch.Version;
-import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.core.MainResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +47,7 @@ public class InfoManager {
         RestHighLevelClient client = esService.getSearchClient();
         Map<String, String> elasticInfo = new LinkedHashMap<String, String>();
         try {
-            MainResponse response = client.info(RequestOptions.DEFAULT);
+            MainResponse response = client.info(CustomRequestOptions.LARGE_BUFFERSIZE_REQUEST_OPTION);
             
             elasticInfo.put("status", "Connected");
             elasticInfo.put("clusterName", response.getClusterName());

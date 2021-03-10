@@ -20,7 +20,6 @@ import org.elasticsearch.action.search.ClearScrollResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchScrollRequest;
-import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -35,7 +34,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -49,7 +47,7 @@ import gov.bnl.channelfinder.XmlTag.OnlyXmlTag;
 @RestController
 @RequestMapping(SCROLL_RESOURCE_URI)
 @EnableAutoConfiguration
-public class ChannelScroll {
+public class ScrollRepository {
     static Logger log = Logger.getLogger(ChannelRepository.class.getName());
 
     @Value("${elasticsearch.channel.index:channelfinder}")
@@ -170,12 +168,12 @@ public class ChannelScroll {
                 searchSourceBuilder.query(qb);
                 searchSourceBuilder.size(size);
                 searchRequest.source(searchSourceBuilder);
-                searchResponse = client.search(searchRequest, RequestOptions.DEFAULT); 
+                searchResponse = client.search(searchRequest, CustomRequestOptions.LARGE_BUFFERSIZE_REQUEST_OPTION);
 
             } else {
                 SearchScrollRequest scrollRequest = new SearchScrollRequest(scrollId);
                 scrollRequest.scroll(scroll);
-                searchResponse = client.scroll(scrollRequest, RequestOptions.DEFAULT);
+                searchResponse = client.scroll(scrollRequest, CustomRequestOptions.LARGE_BUFFERSIZE_REQUEST_OPTION);
                 }
 
             scrollId = searchResponse.getScrollId();
@@ -199,7 +197,7 @@ public class ChannelScroll {
             if(searchHits.length < size) {
                 ClearScrollRequest clearScrollRequest = new ClearScrollRequest(); 
                 clearScrollRequest.addScrollId(scrollId);
-                ClearScrollResponse clearScrollResponse = client.clearScroll(clearScrollRequest, RequestOptions.DEFAULT);
+                ClearScrollResponse clearScrollResponse = client.clearScroll(clearScrollRequest, CustomRequestOptions.LARGE_BUFFERSIZE_REQUEST_OPTION);
                 boolean succeeded = clearScrollResponse.isSucceeded();
             }
             

@@ -25,7 +25,6 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.action.update.UpdateResponse;
-import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -79,7 +78,7 @@ public class TagRepository implements CrudRepository<XmlTag, String> {
                     .id(tag.getName())
                     .source(objectMapper.writeValueAsBytes(tag), XContentType.JSON);
             indexRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
-            IndexResponse indexResponse = client.index(indexRequest, RequestOptions.DEFAULT);
+            IndexResponse indexResponse = client.index(indexRequest, CustomRequestOptions.LARGE_BUFFERSIZE_REQUEST_OPTION);
             /// verify the creation of the tag
             Result result = indexResponse.getResult();
             if (result.equals(Result.CREATED) || result.equals(Result.UPDATED)) {
@@ -112,7 +111,7 @@ public class TagRepository implements CrudRepository<XmlTag, String> {
             }
 
             bulkRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
-            BulkResponse bulkResponse = client.bulk(bulkRequest, RequestOptions.DEFAULT);
+            BulkResponse bulkResponse = client.bulk(bulkRequest, CustomRequestOptions.LARGE_BUFFERSIZE_REQUEST_OPTION);
             /// verify the creation of the tags
             if (bulkResponse.hasFailures()) {
                 // Failed to create all the tags
@@ -156,7 +155,7 @@ public class TagRepository implements CrudRepository<XmlTag, String> {
                     .source(objectMapper.writeValueAsBytes(tag), XContentType.JSON);
             updateRequest.doc(objectMapper.writeValueAsBytes(tag), XContentType.JSON).upsert(indexRequest);
             updateRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
-            UpdateResponse updateResponse = client.update(updateRequest, RequestOptions.DEFAULT);
+            UpdateResponse updateResponse = client.update(updateRequest, CustomRequestOptions.LARGE_BUFFERSIZE_REQUEST_OPTION);
             /// verify the updating/saving of the tag
             Result result = updateResponse.getResult();
             if (result.equals(Result.CREATED) || result.equals(Result.UPDATED) || result.equals(Result.NOOP)) {
@@ -204,7 +203,7 @@ public class TagRepository implements CrudRepository<XmlTag, String> {
             }
 
             bulkRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
-            BulkResponse bulkResponse = client.bulk(bulkRequest, RequestOptions.DEFAULT);
+            BulkResponse bulkResponse = client.bulk(bulkRequest, CustomRequestOptions.LARGE_BUFFERSIZE_REQUEST_OPTION);
             if (bulkResponse.hasFailures()) {
                 // Failed to create/update all the tags
                 throw new Exception();
@@ -247,7 +246,7 @@ public class TagRepository implements CrudRepository<XmlTag, String> {
         RestHighLevelClient client = esService.getSearchClient();
         GetRequest getRequest = new GetRequest(ES_TAG_INDEX, tagId);
         try {
-            GetResponse response = client.get(getRequest, RequestOptions.DEFAULT);
+            GetResponse response = client.get(getRequest, CustomRequestOptions.LARGE_BUFFERSIZE_REQUEST_OPTION);
             if (response.isExists()) {
                 XmlTag tag = objectMapper.readValue(response.getSourceAsBytesRef().streamInput(), XmlTag.class);
                 if(withChannels) {
@@ -276,7 +275,7 @@ public class TagRepository implements CrudRepository<XmlTag, String> {
         getRequest.fetchSourceContext(new FetchSourceContext(false));
         getRequest.storedFields("_none_");
         try {
-            return client.exists(getRequest, RequestOptions.DEFAULT);
+            return client.exists(getRequest, CustomRequestOptions.LARGE_BUFFERSIZE_REQUEST_OPTION);
         } catch (IOException e) {
             log.log(Level.SEVERE, "Failed to check if tag " + id +  " exists", e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
@@ -303,7 +302,7 @@ public class TagRepository implements CrudRepository<XmlTag, String> {
         searchRequest.source(searchSourceBuilder.query(QueryBuilders.matchAllQuery()));
 
         try {
-            SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+            SearchResponse searchResponse = client.search(searchRequest, CustomRequestOptions.LARGE_BUFFERSIZE_REQUEST_OPTION);
             if (searchResponse.status().equals(RestStatus.OK)) {
                 List<XmlTag> result = new ArrayList<XmlTag>();
                 for (SearchHit hit : searchResponse.getHits()) {
@@ -334,7 +333,7 @@ public class TagRepository implements CrudRepository<XmlTag, String> {
         }
         try {
             List<XmlTag> foundTags = new ArrayList<XmlTag>();
-            MultiGetResponse response = esService.getSearchClient().mget(request, RequestOptions.DEFAULT);
+            MultiGetResponse response = esService.getSearchClient().mget(request, CustomRequestOptions.LARGE_BUFFERSIZE_REQUEST_OPTION);
             for (MultiGetItemResponse multiGetItemResponse : response) {
                 if (!multiGetItemResponse.isFailed()) {
                     foundTags.add(objectMapper.readValue(
@@ -367,7 +366,7 @@ public class TagRepository implements CrudRepository<XmlTag, String> {
         request.setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
 
         try {
-            DeleteResponse response = client.delete(request, RequestOptions.DEFAULT);
+            DeleteResponse response = client.delete(request, CustomRequestOptions.LARGE_BUFFERSIZE_REQUEST_OPTION);
             Result result = response.getResult();
             if (!result.equals(Result.DELETED)) {
                 throw new Exception();

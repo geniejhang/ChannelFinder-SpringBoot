@@ -36,8 +36,6 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.action.update.UpdateResponse;
-import org.elasticsearch.client.HttpAsyncResponseConsumerFactory;
-import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -63,24 +61,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.bnl.channelfinder.XmlProperty.OnlyXmlProperty;
 import gov.bnl.channelfinder.XmlTag.OnlyXmlTag;
 
-import javax.annotation.PostConstruct;
-
 @Repository
 @Configuration
 public class ChannelRepository implements CrudRepository<XmlChannel, String> {
-
-    @Value("${server.request.buffersize:104857600}")
-    private int REQUEST_BUFFERSIZE;
-
-    private RequestOptions CUSTOM_BUFFERSIZE_REQUESTOPTIONS;
-
-    @PostConstruct
-    public void createCustomBuffersizeRequestOptions() {
-        RequestOptions.Builder builder = RequestOptions.DEFAULT.toBuilder();
-        builder.setHttpAsyncResponseConsumerFactory(new HttpAsyncResponseConsumerFactory.HeapBufferedResponseConsumerFactory(REQUEST_BUFFERSIZE));
-        CUSTOM_BUFFERSIZE_REQUESTOPTIONS = builder.build();
-    }
-
     static Logger log = Logger.getLogger(ChannelRepository.class.getName());
 
     @Value("${elasticsearch.channel.index:channelfinder}")
@@ -106,7 +89,7 @@ public class ChannelRepository implements CrudRepository<XmlChannel, String> {
                     .id(channel.getName())
                     .source(objectMapper.writeValueAsBytes(channel), XContentType.JSON);
             indexRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
-            IndexResponse indexResponse = client.index(indexRequest, CUSTOM_BUFFERSIZE_REQUESTOPTIONS);
+            IndexResponse indexResponse = client.index(indexRequest, CustomRequestOptions.LARGE_BUFFERSIZE_REQUEST_OPTION);
             /// verify the creation of the channel
             Result result = indexResponse.getResult();
             if (result.equals(Result.CREATED) || result.equals(Result.UPDATED)) {
@@ -139,7 +122,7 @@ public class ChannelRepository implements CrudRepository<XmlChannel, String> {
             }
 
             bulkRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
-            BulkResponse bulkResponse = client.bulk(bulkRequest, CUSTOM_BUFFERSIZE_REQUESTOPTIONS);
+            BulkResponse bulkResponse = client.bulk(bulkRequest, CustomRequestOptions.LARGE_BUFFERSIZE_REQUEST_OPTION);
             // verify the creation of the channels
             if (bulkResponse.hasFailures()) {
                 // Failed to create all the channels
@@ -206,7 +189,7 @@ public class ChannelRepository implements CrudRepository<XmlChannel, String> {
                     .source(objectMapper.writeValueAsBytes(channel), XContentType.JSON);
             updateRequest.doc(objectMapper.writeValueAsBytes(channel), XContentType.JSON).upsert(indexRequest);
             updateRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
-            UpdateResponse updateResponse = client.update(updateRequest, CUSTOM_BUFFERSIZE_REQUESTOPTIONS);
+            UpdateResponse updateResponse = client.update(updateRequest, CustomRequestOptions.LARGE_BUFFERSIZE_REQUEST_OPTION);
             // verify the creation of the channel
             Result result = updateResponse.getResult();
             if (result.equals(Result.CREATED) || result.equals(Result.UPDATED) || result.equals(Result.NOOP)) {
@@ -276,7 +259,7 @@ public class ChannelRepository implements CrudRepository<XmlChannel, String> {
             }
 
             bulkRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
-            BulkResponse bulkResponse = client.bulk(bulkRequest, CUSTOM_BUFFERSIZE_REQUESTOPTIONS);
+            BulkResponse bulkResponse = client.bulk(bulkRequest, CustomRequestOptions.LARGE_BUFFERSIZE_REQUEST_OPTION);
             if (bulkResponse.hasFailures()) {
                 // Failed to create/update all the channels
                 throw new Exception();
@@ -308,7 +291,7 @@ public class ChannelRepository implements CrudRepository<XmlChannel, String> {
         RestHighLevelClient client = esService.getSearchClient();
         GetRequest getRequest = new GetRequest(ES_CHANNEL_INDEX, channelId);
         try {
-            GetResponse response = client.get(getRequest, CUSTOM_BUFFERSIZE_REQUESTOPTIONS);
+            GetResponse response = client.get(getRequest, CustomRequestOptions.LARGE_BUFFERSIZE_REQUEST_OPTION);
             if (response.isExists()) {
                 XmlChannel channel = objectMapper.readValue(response.getSourceAsBytesRef().streamInput(), XmlChannel.class);
                 return Optional.of(channel);
@@ -332,7 +315,7 @@ public class ChannelRepository implements CrudRepository<XmlChannel, String> {
         }
         try {
             long start = System.currentTimeMillis();
-            MultiGetResponse response = client.mget(request, CUSTOM_BUFFERSIZE_REQUESTOPTIONS);
+            MultiGetResponse response = client.mget(request, CustomRequestOptions.LARGE_BUFFERSIZE_REQUEST_OPTION);
             for (MultiGetItemResponse multiGetItemResponse : response) {
                 if (!multiGetItemResponse.getResponse().isExists())
                     return false;
@@ -354,7 +337,7 @@ public class ChannelRepository implements CrudRepository<XmlChannel, String> {
         getRequest.fetchSourceContext(new FetchSourceContext(false));
         getRequest.storedFields("_none_");
         try {
-            return client.exists(getRequest, CUSTOM_BUFFERSIZE_REQUESTOPTIONS);
+            return client.exists(getRequest, CustomRequestOptions.LARGE_BUFFERSIZE_REQUEST_OPTION);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -379,7 +362,7 @@ public class ChannelRepository implements CrudRepository<XmlChannel, String> {
         searchRequest.source(searchSourceBuilder.query(QueryBuilders.matchAllQuery()));
 
         try {
-            SearchResponse searchResponse = client.search(searchRequest, CUSTOM_BUFFERSIZE_REQUESTOPTIONS);
+            SearchResponse searchResponse = client.search(searchRequest, CustomRequestOptions.LARGE_BUFFERSIZE_REQUEST_OPTION);
             if (searchResponse.status().equals(RestStatus.OK)) {
                 List<XmlChannel> result = new ArrayList<XmlChannel>();
                 for (SearchHit hit : searchResponse.getHits()) {
@@ -410,7 +393,7 @@ public class ChannelRepository implements CrudRepository<XmlChannel, String> {
         }
         try {
             List<XmlChannel> foundChannels = new ArrayList<XmlChannel>();
-            MultiGetResponse response = esService.getSearchClient().mget(request, CUSTOM_BUFFERSIZE_REQUESTOPTIONS);
+            MultiGetResponse response = esService.getSearchClient().mget(request, CustomRequestOptions.LARGE_BUFFERSIZE_REQUEST_OPTION);
             for (MultiGetItemResponse multiGetItemResponse : response) {
                 if (!multiGetItemResponse.isFailed()) {
                     foundChannels.add(objectMapper.readValue(
@@ -444,7 +427,7 @@ public class ChannelRepository implements CrudRepository<XmlChannel, String> {
         request.setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
 
         try {
-            DeleteResponse response = client.delete(request, CUSTOM_BUFFERSIZE_REQUESTOPTIONS);
+            DeleteResponse response = client.delete(request, CustomRequestOptions.LARGE_BUFFERSIZE_REQUEST_OPTION);
             Result result = response.getResult();
             if (!result.equals(Result.DELETED)) {
                 throw new Exception();
@@ -561,7 +544,7 @@ public class ChannelRepository implements CrudRepository<XmlChannel, String> {
             searchSourceBuilder.sort(SortBuilders.fieldSort("name").order(SortOrder.ASC));
             searchRequest.source(searchSourceBuilder);
 
-            final SearchResponse searchResponse = client.search(searchRequest, CUSTOM_BUFFERSIZE_REQUESTOPTIONS);
+            final SearchResponse searchResponse = client.search(searchRequest, CustomRequestOptions.LARGE_BUFFERSIZE_REQUEST_OPTION);
             performance.append(
                     "|query:(" + searchResponse.getHits().getTotalHits() + ")" + (System.currentTimeMillis() - start));
             start = System.currentTimeMillis();

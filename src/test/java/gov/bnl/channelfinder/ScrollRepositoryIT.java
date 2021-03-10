@@ -19,11 +19,11 @@ import org.springframework.util.MultiValueMap;
 import gov.bnl.channelfinder.example.PopulateService;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest(ChannelScroll.class)
-public class ChannelScrollIT {
+@WebMvcTest(ScrollRepository.class)
+public class ScrollRepositoryIT {
     
     @Autowired
-    ChannelScroll channelScroll;
+    ScrollRepository scrollRepository;
 
     @Autowired
     ChannelRepository channelRepository;
@@ -66,10 +66,10 @@ public class ChannelScrollIT {
         MultiValueMap<String, String> searchParameters = new LinkedMultiValueMap<String, String>();
         // Search for a single unique channel
         searchParameters.add("~name", channelNames.get(0));
-        XmlScroll scrollResult = channelScroll.search(null,searchParameters);
+        XmlScroll scrollResult = scrollRepository.search(null,searchParameters);
         List<XmlChannel> result = scrollResult.getChannels();
         while(scrollResult.getChannels().size()==100) {
-            scrollResult = channelScroll.search(scrollResult.getId(), null);
+            scrollResult = scrollRepository.search(scrollResult.getId(), null);
             result.addAll(scrollResult.getChannels());
         }
         assertTrue(result.size() == 1 && result.get(0).getName().equals(channelNames.get(0)));
@@ -77,20 +77,20 @@ public class ChannelScrollIT {
         // Search for all channels via wildcards
         searchParameters.clear();
         searchParameters.add("~name", "BR:C001-BI:2{BLA}Pos:?-RB");
-        scrollResult = channelScroll.search(null,searchParameters);
+        scrollResult = scrollRepository.search(null,searchParameters);
         result = scrollResult.getChannels();
         while(scrollResult.getChannels().size()==100) {
-            scrollResult = channelScroll.search(scrollResult.getId(), null);
+            scrollResult = scrollRepository.search(scrollResult.getId(), null);
             result.addAll(scrollResult.getChannels());
         }
         assertTrue("Expected 2 but got " + result.size(), result.size() == 2);
 
         searchParameters.clear();
         searchParameters.add("~name", "BR:C001-BI:?{BLA}Pos:*");
-        scrollResult = channelScroll.search(null,searchParameters);
+        scrollResult = scrollRepository.search(null,searchParameters);
         result = scrollResult.getChannels();
         while(scrollResult.getChannels().size()==100) {
-            scrollResult = channelScroll.search(scrollResult.getId(), null);
+            scrollResult = scrollRepository.search(scrollResult.getId(), null);
             result.addAll(scrollResult.getChannels());
         }       
         assertTrue("Expected 4 but got " + result.size(), result.size() == 4);
@@ -98,10 +98,10 @@ public class ChannelScrollIT {
         // Search for all 1000 channels
         searchParameters.clear();
         searchParameters.add("~name", "SR*");
-        scrollResult = channelScroll.search(null,searchParameters);
+        scrollResult = scrollRepository.search(null,searchParameters);
         result = scrollResult.getChannels();
         while(scrollResult.getChannels().size()==100) {
-            scrollResult = channelScroll.search(scrollResult.getId(), null);
+            scrollResult = scrollRepository.search(scrollResult.getId(), null);
             result.addAll(scrollResult.getChannels());
         }
         assertTrue("Expected 1000 but got " + result.size(), result.size() == 1000);
@@ -109,20 +109,20 @@ public class ChannelScrollIT {
         // Search for all 1000 SR channels and all 500 booster channels
         searchParameters.clear();
         searchParameters.add("~name", "SR*|BR*");
-        scrollResult = channelScroll.search(null,searchParameters);
+        scrollResult = scrollRepository.search(null,searchParameters);
         result = scrollResult.getChannels();
         while(scrollResult.getChannels().size()==100) {
-            scrollResult = channelScroll.search(scrollResult.getId(), null);
+            scrollResult = scrollRepository.search(scrollResult.getId(), null);
             result.addAll(scrollResult.getChannels());
         }
         assertTrue("Expected 1500 but got " + result.size(), result.size() == 1500);
 
         searchParameters.clear();
         searchParameters.add("~name", "SR*,BR*");
-        scrollResult = channelScroll.search(null,searchParameters);
+        scrollResult = scrollRepository.search(null,searchParameters);
         result = scrollResult.getChannels();
         while(scrollResult.getChannels().size()==100) {
-            scrollResult = channelScroll.search(scrollResult.getId(), null);
+            scrollResult = scrollRepository.search(scrollResult.getId(), null);
             result.addAll(scrollResult.getChannels());
         }
         assertTrue("Expected 1500 but got " + result.size(), result.size() == 1500);
@@ -136,10 +136,10 @@ public class ChannelScrollIT {
             searchParameters.add("~name", "SR*");
             searchParameters.add("~tag", "group"+id+"_"+val_bucket.get(index));
 
-            scrollResult = channelScroll.search(null,searchParameters);
+            scrollResult = scrollRepository.search(null,searchParameters);
             result = scrollResult.getChannels();
             while(scrollResult.getChannels().size()==100) {
-                scrollResult = channelScroll.search(scrollResult.getId(), null);
+                scrollResult = scrollRepository.search(scrollResult.getId(), null);
                 result.addAll(scrollResult.getChannels());
             }
             assertTrue("Search: "+ maptoString(searchParameters) +" Failed Expected "+val_bucket.get(index)+" but got " + result.size(), result.size() == val_bucket.get(index));
@@ -154,10 +154,10 @@ public class ChannelScrollIT {
             searchParameters.add("~name", "SR*");
             searchParameters.add("group"+id, String.valueOf(val_bucket.get(index)));
 
-            scrollResult = channelScroll.search(null,searchParameters);
+            scrollResult = scrollRepository.search(null,searchParameters);
             result = scrollResult.getChannels();
             while(scrollResult.getChannels().size()==100) {
-                scrollResult = channelScroll.search(scrollResult.getId(), null);
+                scrollResult = scrollRepository.search(scrollResult.getId(), null);
                 result.addAll(scrollResult.getChannels());
             }
             assertTrue("Search: "+ maptoString(searchParameters) +" Failed Expected "+val_bucket.get(index)+" but got " + result.size(), result.size() == val_bucket.get(index));
